@@ -1,0 +1,78 @@
+
+{% extends "base.html" %}
+{% block index %}
+<body class="template-color-1 spybody white-version" data-spy="scroll" data-target=".navbar-example2" data-offset="150">
+
+    <!-- Start Header -->
+    {% block header %}
+        {% include 'header.html' %}
+    {% endblock %}
+    <!-- End Header Area -->
+
+    <!-- Start Popup Mobile Menu  -->
+    {% block popup %}
+        {% include 'popup.html' %}
+    {% endblock %}
+    <!-- End Popup Mobile Menu  -->
+
+    <main class="main-page-wrapper">
+
+        <!-- Start Slider Area -->
+        {% block home %}
+            {% include 'home.html' %}
+        {% endblock %}
+        <!-- End Slider Area -->
+
+        <!-- Start Experience area -->
+        {% block experience %}
+            {% include 'experience.html' %}
+        {% endblock %}
+     
+        <!-- End Experience area -->
+
+        <!-- Start education section -->
+        {% block education %}
+            {% include 'education.html' %}
+        {% endblock %}
+        <!-- End education section -->
+
+        <!-- Start Resume Area -->
+        {% block resume %}
+            {% include 'resume.html' %}
+        {% endblock %}
+        <!-- End Resume Area -->
+
+        <!-- Start Portfolio Area -->
+        {% block portfolio %}
+            {% include 'portfolio.html' %}
+        {% endblock %}
+        <!-- End portfolio Area -->
+
+        <!-- Start News Area -->
+        {% block blog %}
+            {% include 'blog.html' %}
+        {% endblock %}
+        <!-- ENd Mews Area -->
+        <!-- Modal Portfolio Body area Start -->
+
+        <!-- Back to top end -->
+        <!-- Start Right Demo  -->
+        <!-- <div class="rn-right-demo">
+            <button class="demo-button">
+                <span class="text">Demos</span>
+            </button>
+        </div> -->
+        <!-- End Right Demo  -->
+        {% block modal %}
+            {% include 'modal.html' %}
+        {% endblock %}
+        <!-- Start Modal Area  -->
+
+        <!-- End Modal Area  -->
+    </main>
+    <!-- Rn footer area Start -->
+    {% block footer %}
+        {% include 'footer.html' %}
+    {% endblock %}
+    <!-- Rn footer area end -->
+{% endblock %}
