@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get install -y openssl
 
 # Create SSL certificate and key
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /app/private.key -out /app/certfile.crt -subj "/CN=localhost"
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /home/ec2-user/portfolio/Portfolio/private.key -out /home/ec2-user/portfolio/Portfolio/certfile.crt -subj "/CN=localhost"
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
@@ -23,4 +23,4 @@ EXPOSE 5000
 ENV FLASK_APP=app.py
 
 # Run app.py when the container launches using HTTPS
-CMD ["flask", "run", "--host=0.0.0.0", "--cert=/app/certfile.crt", "--key=/app/private.key"]
+CMD ["flask", "run", "--host=0.0.0.0", "--cert=/home/ec2-user/portfolio/Portfolio/certfile.crt", "--key=/home/ec2-user/portfolio/Portfolio/private.key"]
