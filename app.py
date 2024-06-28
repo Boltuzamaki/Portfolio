@@ -1,6 +1,4 @@
 from flask import Flask, render_template
-from flask import Flask, request, jsonify
-import subprocess
 
 app = Flask(__name__, static_folder="assets", template_folder="templates")
 
@@ -124,21 +122,6 @@ resume = {
         },
     ],
 }
-
-
-@app.route("/deploy", methods=["POST"])
-def deploy():
-    try:
-        # Run the deployment script
-        result = subprocess.run(["./deploy.sh"], capture_output=True, text=True)
-        if result.returncode != 0:
-            return jsonify({"error": result.stderr}), 500
-        return (
-            jsonify({"message": "Deployment successful", "output": result.stdout}),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/")
