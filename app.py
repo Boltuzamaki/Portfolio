@@ -1,131 +1,122 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, request
+from database import create_app
+from database.db import (
+    db,
+    Experience,
+    Education,
+    Portfolio,
+    ResumeEducation,
+    ResumeExperience,
+)
+from flask_admin import Admin, AdminIndexView
+from flask_admin.contrib.sqla import ModelView
+from flask_login import (
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    current_user,
+    UserMixin,
+)
+from werkzeug.security import check_password_hash
+from dotenv import load_dotenv
+import os
 
-app = Flask(__name__, static_folder="assets", template_folder="templates")
+load_dotenv()
 
+SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
+SQLALCHEMY_TRACK_MODIFICATIONS = os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
+SECRET_KEY = os.environ.get("SECRET_KEY")
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
+ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
 
-# Dummy data to simulate MongoDB data
-experiences = [
-    {
-        "date": "2015-Present",
-        "title": "Rainbow - Themes",
-        "subtitle": "Co-Founder, Web Designer & Developer",
-        "description": "Reinvetning the way you create websites",
-        "image": "assets/images/portfolio/portfolio-01.jpg",
-    },
-    {
-        "date": "2015-Present",
-        "title": "App Development",
-        "subtitle": "Co-Founder, Web Designer & Developer",
-        "description": "Reinvetning the way you create websites",
-        "image": "assets/images/portfolio/portfolio-02.jpg",
-    },
-    {
-        "date": "2015-Present",
-        "title": "Application Management",
-        "subtitle": "Co-Founder, Web Designer & Developer",
-        "description": "Reinvetning the way you create websites",
-        "image": "assets/images/portfolio/portfolio-03.jpg",
-    },
-]
+app = create_app(
+    database_uri=SQLALCHEMY_DATABASE_URI,
+    track_modifications=SQLALCHEMY_TRACK_MODIFICATIONS,
+    secret_key=SECRET_KEY,
+)
 
-
-education = [
-    {
-        "date": "2015-Present",
-        "title": "Software Develop.",
-        "subtitle": "PhD in Software Development",
-        "description": "Advanced studies in software development.",
-        "image": "assets/images/portfolio/portfolio-04.jpg",
-    },
-    {
-        "date": "2012-2015",
-        "title": "Web Design",
-        "subtitle": "Master's in Web Design",
-        "description": "In-depth knowledge of modern web design.",
-        "image": "assets/images/portfolio/portfolio-05.jpg",
-    },
-]
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 
-portfolio = [
-    {
-        "category": "PHOTOSHOP",
-        "likes": 650,
-        "title": "The services provide for design",
-        "image": "assets/images/portfolio/portfolio-06.jpg",
-    },
-    {
-        "category": "Figma",
-        "likes": 650,
-        "title": "Mobile app landing design & Services",
-        "image": "assets/images/portfolio/portfolio-05.jpg",
-    },
-    {
-        "category": "Laravel",
-        "likes": 650,
-        "title": "Web app Responsive design & Services",
-        "image": "assets/images/portfolio/portfolio-04.jpg",
-    },
-    {
-        "category": "Figma",
-        "likes": 650,
-        "title": "PHP with app landing design & Services",
-        "image": "assets/images/portfolio/portfolio-03.jpg",
-    },
-]
+class User(UserMixin):
+    id = "admin"
 
-resume = {
-    "education": [
-        {
-            "title": "Personal Portfolio April Fools",
-            "institution": "University of DVI",
-            "period": "1997 - 2001",
-            "grade": "4.30/5",
-            "description": "The education should be very interactual. Ut tincidunt est ac dolor aliquam sodales. Phasellus sed mauris hendrerit, laoreet sem in, lobortis mauris hendrerit ante.",
-        },
-        {
-            "title": "Examples Of Personal Portfolio",
-            "institution": "College of Studies",
-            "period": "2000 - 2002",
-            "grade": "4.50/5",
-            "description": "Maecenas finibus nec sem ut imperdiet. Ut tincidunt est ac dolor aliquam sodales. Phasellus sed mauris hendrerit, laoreet sem in, lobortis mauris hendrerit ante.",
-        },
-        {
-            "title": "Tips For Personal Portfolio",
-            "institution": "University of Studies",
-            "period": "1997 - 2001",
-            "grade": "4.80/5",
-            "description": "If you are going to use a passage. Ut tincidunt est ac dolor aliquam sodales. Phasellus sed mauris hendrerit, laoreet sem in, lobortis mauris hendrerit ante.",
-        },
-    ],
-    "experience": [
-        {
-            "title": "Diploma in Web Development",
-            "institution": "BSE In CSE",
-            "period": "2004 - 2008",
-            "grade": "4.70/5",
-            "description": "Contrary to popular belief. Ut tincidunt est ac dolor aliquam sodales. Phasellus sed mauris hendrerit, laoreet sem in, lobortis mauris hendrerit ante.",
-        },
-        {
-            "title": "The Personal Portfolio Mystery",
-            "institution": "Job at Rainbow-Themes",
-            "period": "2008 - 2016",
-            "grade": "4.95/5",
-            "description": "Generate Lorem Ipsum which looks. Ut tincidunt est ac dolor aliquam sodales. Phasellus sed mauris hendrerit, laoreet sem in, lobortis mauris hendrerit ante.",
-        },
-        {
-            "title": "Diploma in Computer Science",
-            "institution": "Works at Plugin Development",
-            "period": "2016 - 2020",
-            "grade": "5.00/5",
-            "description": "Maecenas finibus nec sem ut imperdiet. Ut tincidunt est ac dolor aliquam sodales. Phasellus sed mauris hendrerit, laoreet sem in, lobortis mauris hendrerit ante.",
-        },
-    ],
-}
+
+@login_manager.user_loader
+def load_user(user_id):
+    if user_id == "admin":
+        return User()
+    return None
+
+
+class AuthenticatedModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for("login"))
+
+
+class AuthenticatedAdminIndexView(AdminIndexView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for("login"))
+
+
+admin = Admin(
+    app,
+    name="Admin Panel",
+    template_mode="bootstrap3",
+    index_view=AuthenticatedAdminIndexView(),
+)
+admin.add_view(AuthenticatedModelView(Experience, db.session))
+admin.add_view(AuthenticatedModelView(Education, db.session))
+admin.add_view(AuthenticatedModelView(Portfolio, db.session))
+admin.add_view(AuthenticatedModelView(ResumeEducation, db.session))
+admin.add_view(AuthenticatedModelView(ResumeExperience, db.session))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        print(password, "===========>")
+        print(ADMIN_PASSWORD_HASH, "============>")
+        print(check_password_hash(ADMIN_PASSWORD_HASH, password), "================>")
+        if username == ADMIN_USERNAME and check_password_hash(
+            ADMIN_PASSWORD_HASH, password
+        ):
+            login_user(User())
+            return redirect(url_for("admin.index"))
+    return render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
 
 @app.route("/")
 def index():
+    experiences = Experience.query.all()
+    education = Education.query.all()
+    portfolio = Portfolio.query.all()
+    resume_education = ResumeEducation.query.all()
+    resume_experience = ResumeExperience.query.all()
+
+    resume = {
+        "education": resume_education,
+        "experience": resume_experience,
+    }
+
     return render_template(
         "index.html",
         experiences=experiences,
