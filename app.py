@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
-from database import create_app
-from database.db import (
+from flask_app.database import create_app
+from flask_app.database.db import (
     db,
     Experience,
     Education,

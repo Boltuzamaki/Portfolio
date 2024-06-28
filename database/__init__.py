@@ -1,5 +1,5 @@
 from flask import Flask
-from database.db import db
+from flask_app.database.db import db
 
 
 def create_app(database_uri, track_modifications, secret_key):
