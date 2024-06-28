@@ -18,4 +18,4 @@ EXPOSE 5000
 ENV FLASK_APP=app.py
 
 # Run app.py when the container launches using HTTPS
-CMD ["flask", "run", "--host=0.0.0.0", "--cert=certfile.crt", "--key=private.key"]
+CMD ["flask", "run", "--host=0.0.0.0"]
