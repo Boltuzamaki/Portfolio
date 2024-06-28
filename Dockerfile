@@ -10,11 +10,6 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install OpenSSL to create a self-signed certificate
-RUN apt-get update && apt-get install -y openssl
-
-# Create SSL certificate and key
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout private.key -out certfile.crt -subj "/CN=localhost"
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
